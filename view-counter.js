@@ -1,6 +1,6 @@
-document.addEventListener("DOMContentLoaded", function () {
+function updateViewCounter() {
   const el = document.querySelector(".view-count-value");
-  if (!el) return;
+  if (!el) return; // Element not ready yet
 
   const postUrl = window.location.pathname;
   if (!postUrl || postUrl.length < 2) return;
@@ -11,7 +11,18 @@ document.addEventListener("DOMContentLoaded", function () {
   fetch(apiUrl)
     .then(res => res.json())
     .then(data => {
-      el.textContent = data.value || 0;
+      const v = data.value || 0;
+      el.textContent = v + (v === 1 ? " time" : " times");
     })
     .catch(err => console.warn("Counter Error:", err));
-});
+}
+
+// Retry until element exists (because Blogger loads dynamically)
+let tries = 0;
+const waitEl = setInterval(() => {
+  tries++;
+  if (document.querySelector(".view-count-value") || tries > 20) {
+    clearInterval(waitEl);
+    updateViewCounter();
+  }
+}, 300);
